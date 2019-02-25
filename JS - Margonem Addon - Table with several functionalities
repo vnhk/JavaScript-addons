@@ -1,0 +1,93 @@
+(function() {
+
+    var newDiv = document.createElement('div');
+
+    newDiv.id = "tabelka";
+    newDiv.style.position = "absolute";
+    newDiv.style.left = "832px";
+    newDiv.style.width = "100px";
+    newDiv.style.height = "537px";
+
+
+    document.getElementById('corners').appendChild(newDiv);
+
+
+    var butt = [1, 2, 3];
+
+    for (var i = 0; i < 3; ++i) {
+        butt[i] = document.createElement('h5');
+        butt[i].style.width = "76px";
+        butt[i].style.padding = "10px";
+        butt[i].style.textAlign = "center";
+        butt[i].style.color = "white";
+        document.getElementById('tabelka').appendChild(butt[i]);
+    }
+
+
+    butt[0].innerHTML = "Zaniżanie lotu";
+    butt[1].innerHTML = '<input tip = "Najmniejszy lvl w grupie" id = "textArea" type ="text" value = "Wpisz lvl", style = "background:black;color:white""/>';
+    butt[2].innerHTML = "OK";
+
+
+
+
+    var textArea = document.getElementById("textArea");
+
+    textArea.style.width = "100%";
+    textArea.style.border = "none";
+    textArea.style.textAlign = "center";
+    textArea.style.fontSize = "17px";
+
+
+    function Round(n, k) {
+        var factor = Math.pow(10, k);
+        return Math.round(n * factor) / factor;
+    }
+
+    function zanizanieLotu() {
+        var level = hero.lvl;
+        //Świat zwykły
+        message("Na publiku możesz bić z " + Math.floor(level * 1.2 + 4) + "lvl");
+        //Świat prywatny:
+        message("Na privie możesz bić z " + Math.floor(level * 1.4 + 4) + "lvl");
+    }
+
+    function znajdzlvl() {
+
+        var level = textArea.value;
+        var lvl = Round(level, 0);
+
+        if (lvl > 0 && lvl < 301) {
+            //Świat zwykły
+            message("Na publiku " + lvl + " może bić z " + Math.floor(lvl * 1.2 + 4) + "lvl");
+            //Świat prywatny:
+            message("Na privie " + lvl + " może bić z " + Math.floor(lvl * 1.4 + 4) + "lvl");
+        } else message("Podaj prawidlowy poziom - 1-300");
+    }
+
+    function clear() {
+        document.getElementById("textArea").value = "";
+    }
+
+    butt[0].addEventListener('click', zanizanieLotu);
+    butt[1].addEventListener('click', clear);
+    butt[2].addEventListener('click', znajdzlvl);
+
+    $("h5").hover(function() {
+        $(this).css("cursor", "pointer");
+
+    });
+    $("#textArea").hover(function() {
+        $(this).css("cursor", "pointer");
+    });
+    $(butt).hover(function() {
+            $(this).css("backgroundColor", "#555");
+        },
+        function() {
+            $(this).css("background-color", "black");
+        });
+    $(butt[1]).hover(function() {
+        $(this).css("backgroundColor", "black");
+    });
+
+})();

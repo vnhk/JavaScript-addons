@@ -1,0 +1,177 @@
+g.loadQueue.push({
+    fun: mobki
+});
+
+function mobki() {
+    if (localStorage.getItem("npcToKill" + hero.id) == null)
+        localStorage.setItem("npcToKill" + hero.id, "");
+
+    let iter = 0;
+    let tmp = localStorage.getItem("npcToKill" + hero.id);
+    let str = [];
+    let attack = document.getElementsByClassName('troop');
+    let timer = document.getElementById("battletimer");
+    let fbool = false;
+    let miniMapNpcToKill = document.getElementsByClassName("mmpMapObject mmp-mob");
+    let miniMapNpcElitToKill = document.getElementsByClassName("mmpMapObject mmp-elite");
+
+    function createInnerText() {
+        let string = localStorage.getItem("npcToKill" + hero.id);
+        string = string.replace(/,/g, "<br>");
+        return string;
+    }
+
+
+
+    let newDiv = document.createElement('div');
+    newDiv.id = "npcTokillDiv";
+    newDiv.style.width = "200px";
+    newDiv.style.height = "500px";
+    newDiv.style.overflow = "scroll";
+    newDiv.style.fontSize = "20px";
+    newDiv.innerHTML = createInnerText();
+    newDiv.style.position = "absolute";
+    newDiv.style.top = "5px";
+    newDiv.style.left = "860px";
+    document.getElementById('corners').appendChild(newDiv);
+
+    if (tmp) {
+        str = tmp.split(",");
+        if (str[str.length - 1] == "" && str.length > 1)
+            str.pop();
+    }
+
+    function findBrackets(tekst) {
+        let x = tekst.indexOf("(");
+        let y = tekst.indexOf(")");
+        if (tekst.indexOf("*") != -1)
+            return tekst.substring(0, tekst.length - (y - x + 2) - 1);
+        return tekst.substring(0, tekst.length - (y - x + 2));
+    }
+
+    function doQuesta(npc) {
+        if (npc.attributes.tip) {
+            for (let iterator = 0; iterator < str.length; iterator++) {
+                if (npc.attributes.tip.value.indexOf(findBrackets(str[iterator]) + "</b>") >= 0) {
+                    return true;
+                }
+            }
+            return false;
+        } else return false;
+    }
+
+    if (localStorage.getItem("npcToKill" + hero.id) != "")
+        setInterval(function() {
+            var npcToFind = document.getElementsByClassName('npc');
+
+            for (let i = 0; i < npcToFind.length; i++) {
+                if (doQuesta(npcToFind[i])) {
+                    npcToFind[i].style.border = "2px dotted red";
+                } else
+                    npcToFind[i].style.border = "";
+            }
+
+
+            if (miniMapNpcToKill.length > 0) {
+                for (let i = 0; i < miniMapNpcToKill.length; ++i) {
+                    if (doQuesta(miniMapNpcToKill[i])) {
+                        miniMapNpcToKill[i].style.border = "3px dotted red";
+                    } else
+                        miniMapNpcToKill[i].style.border = "";
+                }
+            }
+            if (miniMapNpcElitToKill.length > 0) {
+                for (let i = 0; i < miniMapNpcElitToKill.length; ++i) {
+                    if (doQuesta(miniMapNpcElitToKill[i])) {
+                        miniMapNpcElitToKill[i].style.border = "3px dotted red";
+                    } else
+                        miniMapNpcElitToKill[i].style.border = "";
+                }
+            }
+
+        }, 5000);
+
+
+    //nowe
+    //nowe
+
+    document.addEventListener('keydown', function(event) {
+        if (document.getElementsByClassName("scroll400 questlist").length > 0 && !fbool)
+            if (event.keyCode == 80) //p
+        {
+            fbool = true;
+            let string = setText();
+            if (string[string.length - 1] == "" && string.length > 1)
+                string.pop();
+            localStorage.setItem("npcToKill" + hero.id, string);
+
+        }
+    });
+
+    function setText() {
+        let strTmp = "";
+        let mobsToKill = document.getElementsByClassName('q_kill');
+        for (let i = 0; i < mobsToKill.length; i++) {
+            strTmp += (mobsToKill[i].innerText.substring(7, mobsToKill[i].innerText.length)) + ",";
+        }
+        if (strTmp == "")
+            return "";
+        return strTmp;
+    }
+
+    function addkills(x, y, z) {
+        let slashTemp = str[y].indexOf("/");
+        let temp = str[y].substr(x + 1, slashTemp - x - 1);
+        let yourKills = parseInt(temp) + 1;
+        let allKills = parseInt(str[y].substring(slashTemp + 1, z));
+        str[y] = str[y].replace(temp, yourKills);
+
+        if (yourKills == allKills)
+            str.splice(y, 1);
+    }
+
+    function fightWithNpc() {
+        if (str[str.length - 1] == "" && str.length > 1)
+            str.pop();
+
+        if (timer.innerHTML == "Walka zakończona.") {
+            for (let y = 0; y < str.length; y++) {
+                for (let i = 0; i < attack.length; i++) {
+                    let x = str[y].indexOf("(");
+                    let z = str[y].indexOf(")");
+                    let newSTR = str[y].substring(0, str[y].length - 1 - (z - x + 1));
+
+                    if (newSTR.indexOf("*") >= 0) {
+                        if (attack[i].attributes.tip.value.indexOf(newSTR.substring(0, newSTR.length - 1)) != -1) {
+                            addkills(x, y, z);
+                        }
+                    } else if (attack[i].attributes.tip.value.indexOf(newSTR + "</b>") != -1) {
+
+                        if (attack[i].attributes.tip.value.indexOf("Życie: 0%") != -1) {
+                            addkills(x, y, z);
+
+                        }
+                    }
+                }
+
+            }
+            localStorage.setItem("npcToKill" + hero.id, str);
+            newDiv.innerHTML = createInnerText();
+        }
+
+
+    }
+    var tmpBattleMsg = battleMsg;
+    battleMsg = function(c, t) {
+        var ret = tmpBattleMsg(c, t);
+        if (c.search(/winner=/) >= 0) {
+            setTimeout(function() {
+                fightWithNpc();
+            }, 500);
+        }
+        return ret;
+    }
+
+
+
+}
